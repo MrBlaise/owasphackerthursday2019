@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: config-reader
+  name: my-app
   labels:
-    app: config-reader
+    app: my-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: config-reader
+      app: my-app
   template:
     metadata:
       labels:
-        app: config-reader
+        app: my-app
     spec:
       serviceAccountName: vault
       volumes:
@@ -114,7 +114,7 @@ spec:
             ]
 
         # Config reader app
-        - name: config-reader
+        - name: my-app
           image: nginx:1.15.8
 
           ports:

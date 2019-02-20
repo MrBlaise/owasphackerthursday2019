@@ -96,13 +96,13 @@ curl --request POST --data '{"jwt": "'"$KUBE_TOKEN"'", "role": "avatao-reader"}'
 ```
 
 ### Create vault-agent and consul-template configuration
-* `kubectl apply -f config-reader/config-reader-configmap.yml`
+* `kubectl apply -f my-app/my-app-configmap.yml`
 
-### Bring up the config-reader app and a service
-* `kubectl apply -f config-reader/`
+### Bring up the my-app app and a service
+* `kubectl apply -f my-app/`
 
-### Open the config-reader app and examine the output
-* `minikube service config-reader`
+### Open the my-app app and examine the output
+* `minikube service my-app`
 
 ### Change the secret in vault and see the results
 Be careful to add the ttl parameter to tell consul to poll the value often
