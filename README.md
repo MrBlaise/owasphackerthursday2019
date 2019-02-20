@@ -84,8 +84,9 @@ vault write auth/kubernetes/role/avatao-reader \
 ```
 
 ### Test our setup
+* `kubectl run --generator=run-pod/v1 tmp --rm -i --tty --serviceaccount=vault --image alpine:3.7`
+
 ```
-kubectl run --generator=run-pod/v1 tmp --rm -i --tty --serviceaccount=vault --image alpine:3.7
 apk update
 apk add curl jq
 VAULT_ADDR=http://vault:8200
