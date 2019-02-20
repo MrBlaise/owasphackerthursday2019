@@ -80,7 +80,7 @@ vault write auth/kubernetes/role/avatao-reader \
         bound_service_account_names=vault \
         bound_service_account_namespaces=default \
         policies=avatao-readonly \
-        ttl=24h
+        period=24h
 ```
 
 ### Test our setup
@@ -94,4 +94,17 @@ curl -s $VAULT_ADDR/v1/sys/health | jq
 KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 curl --request POST --data '{"jwt": "'"$KUBE_TOKEN"'", "role": "avatao-reader"}' $VAULT_ADDR/v1/auth/kubernetes/login | jq
 ```
+
+### Create vault-agent and consul-template configuration
+* `kubectl apply -f config-reader/config-reader-configmap.yml`
+
+### Bring up the config-reader app and a service
+* `kubectl apply -f config-reader/`
+
+### Open the config-reader app and examine the output
+* `minikube service config-reader`
+
+### Change the secret in vault and see the results
+Be careful to add the ttl parameter to tell consul to poll the value often
+* `vault kv put secret/avatao/config username="admin" password="verysecretmuchpassword" ttl="5s"`
 
