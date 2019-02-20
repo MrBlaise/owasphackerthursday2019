@@ -31,7 +31,7 @@
  * `vault policy write avatao-readonly avatao-readonly.hcl`
 
 ### Create some secret
- * `vault kv put secret/avatao/config username="avatao" password="secret" ttl='10s'`
+ * `vault kv put secret/avatao/my-secret username="avatao" password="secret" ttl='10s'`
 
 ### Enable userpass
  * `vault auth enable userpass`
@@ -43,7 +43,7 @@
  * `vault login -method=userpass username="test-user" password="test"`
 
 ### Test whether you can see the secret
- * `vault kv get secret/avatao/config`
+ * `vault kv get secret/avatao/my-secret`
 
 ### Log back with admin
  * `vault login -method=token <ROOT_TOKEN>`
@@ -106,5 +106,5 @@ curl --request POST --data '{"jwt": "'"$KUBE_TOKEN"'", "role": "avatao-reader"}'
 
 ### Change the secret in vault and see the results
 Be careful to add the ttl parameter to tell consul to poll the value often
-* `vault kv put secret/avatao/config username="admin" password="verysecretmuchpassword" ttl="5s"`
+* `vault kv put secret/avatao/my-secret username="admin" password="verysecretmuchpassword" ttl="5s"`
 

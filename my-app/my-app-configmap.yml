@@ -17,8 +17,8 @@ data:
       contents = <<EOH
       <html>
       <body>
-      <p>Config:</p>
-      {{- with secret "secret/avatao/config" }}
+      <p>Secrets from Vault:</p>
+      {{- with secret "secret/avatao/my-secret" }}
       <ul>
       <li><pre>username: {{ .Data.username }}</pre></li>
       <li><pre>password: {{ .Data.password }}</pre></li>
