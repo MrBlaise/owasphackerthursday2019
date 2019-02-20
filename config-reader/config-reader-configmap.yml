@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vault-agent-consul-template
+  namespace: default
+data:
+  consul-template-config.hcl: |
+    vault {
+      renew_token = true
+      retry {
+        backoff = "1s"
+      }
+    }
+
+    template {
+      destination = "/etc/secrets/index.html"
+      contents = <<EOH
+      <html>
+      <body>
+      <p>Config:</p>
+      {{- with secret "secret/avatao/config" }}
+      <ul>
+      <li><pre>username: {{ .Data.username }}</pre></li>
+      <li><pre>password: {{ .Data.password }}</pre></li>
+      </ul>
+      {{ end }}
+      </body>
+      </html>  
+      EOH
+    }
+  vault-agent-config.hcl: |
+    # This ensures we can run the agent as initcontainer 
+    exit_after_auth = true
+    pid_file = "/home/vault/pidfile"
+
+    auto_auth {
+        method "kubernetes" {
+            mount_path = "auth/kubernetes"
+            config = {
+                role = "avatao-reader"
+            }
+        }
+
+        sink "file" {
+            config = {
+                path = "/home/vault/.vault-token"
+            }
+        }
+    }

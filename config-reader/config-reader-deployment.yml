@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-reader
+  labels:
+    app: config-reader
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config-reader
+  template:
+    metadata:
+      labels:
+        app: config-reader
+    spec:
+      serviceAccountName: vault
+      volumes:
+        - name: vault-token-memory
+          emptyDir:
+            medium: Memory
+        - name: config
+          configMap:
+            name: vault-agent-consul-template
+            items:
+              - key: vault-agent-config.hcl
+                path: vault-agent-config.hcl
+
+              - key: consul-template-config.hcl
+                path: consul-template-config.hcl
+        - name: shared-data
+          emptyDir: {}
+      initContainers:
+        # Vault agent container
+        - name: vault-agent-init
+          image: vault:1.0.3
+
+          volumeMounts:
+            - name: vault-token-memory
+              mountPath: /home/vault
+
+            - name: config
+              mountPath: /etc/vault
+
+          env:
+            - name: VAULT_ADDR
+              value: http://vault:8200
+
+          # Run the Vault agent
+          args:
+            [
+              "agent",
+              "-config=/etc/vault/vault-agent-config.hcl",
+              "-log-level=debug",
+            ]
+      # Consul Template container
+        - name: consul-template-init
+          image: hashicorp/consul-template:0.19.5-scratch
+          imagePullPolicy: Always
+
+          volumeMounts:
+            - name: vault-token-memory
+              mountPath: /home/vault
+
+            - name: config
+              mountPath: /etc/consul-template
+
+            - name: shared-data
+              mountPath: /etc/secrets
+
+          env:
+            - name: HOME
+              value: /home/vault
+
+            - name: VAULT_ADDR
+              value: http://vault:8200
+
+          # Consul-Template looks in $HOME/.vault-token, $VAULT_TOKEN, or -vault-token (via CLI)
+          # Using the -once parameter to run it as init container
+          args:
+            [
+              "-config=/etc/consul-template/consul-template-config.hcl",
+              "-log-level=debug",
+              "-once"
+            ]
+      containers:
+        # Consul Template sidecar container
+        - name: consul-template
+          image: hashicorp/consul-template:0.19.5-scratch
+          imagePullPolicy: Always
+
+          volumeMounts:
+            - name: vault-token-memory
+              mountPath: /home/vault
+
+            - name: config
+              mountPath: /etc/consul-template
+
+            - name: shared-data
+              mountPath: /etc/secrets
+
+          env:
+            - name: HOME
+              value: /home/vault
+
+            - name: VAULT_ADDR
+              value: http://vault:8200
+
+          # Skip -once paramater for the sidecar container
+          args:
+            [
+              "-config=/etc/consul-template/consul-template-config.hcl",
+              "-log-level=debug",
+            ]
+
+        # Config reader app
+        - name: config-reader
+          image: nginx:1.15.8
+
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+
+          volumeMounts:
+            - name: shared-data
+              mountPath: /usr/share/nginx/html
