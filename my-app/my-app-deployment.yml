@@ -56,7 +56,7 @@ spec:
       # Consul Template container
         - name: consul-template-init
           image: hashicorp/consul-template:0.19.5-scratch
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
 
           volumeMounts:
             - name: vault-token-memory
@@ -87,7 +87,7 @@ spec:
         # Consul Template sidecar container
         - name: consul-template
           image: hashicorp/consul-template:0.19.5-scratch
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
 
           volumeMounts:
             - name: vault-token-memory
