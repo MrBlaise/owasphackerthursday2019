@@ -1,3 +1,10 @@
+# Prerequisites
+
+- Kubectl: https://kubernetes.io/docs/tasks/tools/install-kubectl/
+- Minikube: https://kubernetes.io/docs/tasks/tools/install-minikube/
+  * Minikube needs a hypervisor like VirtualBox, you can find instruction on the linked page above.
+- Vault: https://www.vaultproject.io/docs/install/
+
 # Steps
 
 ### Start minikube
